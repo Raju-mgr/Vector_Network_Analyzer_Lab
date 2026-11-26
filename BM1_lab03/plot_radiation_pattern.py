@@ -39,101 +39,103 @@ def plot_pattern(
     # --------------------------------------------------
     # Main direction
     # --------------------------------------------------
-    # ax.plot(
-    #     [np.deg2rad(main_angle), np.deg2rad(main_angle)],
-    #     [mag_db.min(), 0],
-    #     'r--',
-    #     linewidth=2,
-    #     label="Main direction"
-    # )
+    ax.plot(
+        [np.deg2rad(main_angle), np.deg2rad(main_angle)],
+        [mag_db.min(), 0],
+        'r--',
+        linewidth=2,
+        label="Main direction"
+    )
 
     # --------------------------------------------------
     # Opening angle (from crossings)
     # --------------------------------------------------
-    # if len(crossings) == 2:
-    #     left_c, right_c = crossings
+    if len(crossings) == 2:
+        left_c, right_c = crossings
 
-    #     # Edge lines
-    #     for c in crossings:
-    #         ax.plot(
-    #             [np.deg2rad(c), np.deg2rad(c)],
-    #             [mag_db.min(), 0],
-    #             'g--',
-    #             linewidth=1.5
-    #         )
+        # Edge lines
+        for c in crossings:
+            ax.plot(
+                [np.deg2rad(c), np.deg2rad(c)],
+                [mag_db.min(), 0],
+                'g--',
+                linewidth=1.5
+            )
 
-    #     # Filled wedge
-    #     ax.fill_between(
-    #         [np.deg2rad(left_c), np.deg2rad(right_c)],
-    #         mag_db.min(),
-    #         0,
-    #         color='green',
-    #         alpha=0.10
-    #     )
+        # Filled wedge
+        ax.fill_between(
+            [np.deg2rad(left_c), np.deg2rad(right_c)],
+            mag_db.min(),
+            0,
+            color='green',
+            alpha=0.10
+        )
 
         # --------------------------------------------------
         # Opening angle ARC (wrap-safe)
         # --------------------------------------------------
-        # arc_radius = -15.0  # dB level for arc (always visible)
+        radial_span = 0.0 - mag_db.min()
+        arc_radius = mag_db.min() + 0.25 * radial_span  # arc at 25% of the radial span
+        label_radius = arc_radius + 0.08 * radial_span  # label slightly above the arc
 
-        # if left_c <= right_c:
-        #     # Normal case (no wrap)
-        #     arc_angles = np.linspace(
-        #         np.deg2rad(left_c),
-        #         np.deg2rad(right_c),
-        #         200
-        #     )
-        #     ax.plot(
-        #         arc_angles,
-        #         np.full_like(arc_angles, arc_radius),
-        #         color='green',
-        #         linewidth=2
-        #     )
-        #     mid_angle = 0.5 * (left_c + right_c)
+        if left_c <= right_c:
+            # Normal case (no wrap)
+            arc_angles = np.linspace(
+                np.deg2rad(left_c),
+                np.deg2rad(right_c),
+                200
+            )
+            ax.plot(
+                arc_angles,
+                np.full_like(arc_angles, arc_radius),
+                color='green',
+                linewidth=2
+            )
+            mid_angle = 0.5 * (left_c + right_c)
 
-        # else:
-        #     # Wrap-around case (crosses 0°)
-        #     arc1 = np.linspace(
-        #         np.deg2rad(left_c),
-        #         np.deg2rad(360),
-        #         100
-        #     )
-        #     arc2 = np.linspace(
-        #         0,
-        #         np.deg2rad(right_c),
-        #         100
-        #     )
+        else:
+            # Wrap-around case (crosses 0°)
+            arc1 = np.linspace(
+                np.deg2rad(left_c),
+                np.deg2rad(360),
+                100
+            )
+            arc2 = np.linspace(
+                0,
+                np.deg2rad(right_c),
+                100
+            )
 
-        #     ax.plot(
-        #         arc1,
-        #         np.full_like(arc1, arc_radius),
-        #         color='green',
-        #         linewidth=2
-        #     )
-        #     ax.plot(
-        #         arc2,
-        #         np.full_like(arc2, arc_radius),
-        #         color='green',
-        #         linewidth=2
-        #     )
+            ax.plot(
+                arc1,
+                np.full_like(arc1, arc_radius),
+                color='green',
+                linewidth=2
+            )
+            ax.plot(
+                arc2,
+                np.full_like(arc2, arc_radius),
+                color='green',
+                linewidth=2
+            )
 
-        #     mid_angle = (left_c + (right_c + 360)) / 2
-        #     if mid_angle >= 360:
-        #         mid_angle -= 360
+            mid_angle = (left_c + (right_c + 360)) / 2
+            if mid_angle >= 360:
+                mid_angle -= 360
 
-        # # --------------------------------------------------
-        # # Arc label
-        # # --------------------------------------------------
-        # ax.text(
-        #     np.deg2rad(mid_angle),
-        #     arc_radius + 1.0,
-        #     f"{opening_angle:.1f}°",
-        #     color="green",
-        #     fontsize=12,
-        #     fontweight="bold",
-        #     ha="center",
-        #     va="center"
-        # )
+        # --------------------------------------------------
+        # Arc label
+        # --------------------------------------------------
+        ax.text(
+                np.deg2rad(mid_angle),
+                label_radius,
+                f"{opening_angle:.1f}°",
+                color="green",
+                fontsize=12,
+                fontweight="bold",
+                ha="center",
+                va="center"
+            )
 
     # --------------------------------------------------
     # Polar formatting (antenna standard)
@@ -148,18 +150,19 @@ def plot_pattern(
     ax.set_rlim(mag_db.min(), 0)
     ax.set_rlabel_position(225)
 
+
     # --------------------------------------------------
     # Title & legend
     # --------------------------------------------------
     if len(crossings) == 2:
         title = (
             f"{orientation.capitalize()} Radiation Pattern @{resonance_freq_mhz} MHz\n"
-            # f"Main direction: {main_angle:.1f}° | Opening angle: {opening_angle:.1f}°"
+            f"Main direction: {main_angle:.1f}° | Opening angle: {opening_angle:.1f}°"
         )
     else:
         title = (
             f"{orientation.capitalize()} Radiation Pattern @{resonance_freq_mhz} MHz\n"
-            # f"Main direction: {main_angle:.1f}° | Opening angle: Not detectable"
+            f"Main direction: {main_angle:.1f}° | Opening angle: Not detectable"
         )
 
     ax.set_title(title, pad=20)
